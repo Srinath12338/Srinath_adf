@@ -1,0 +1,9 @@
+{
+	"name": "Srinathmadf",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c7814444-e90e-452c-b4e9-017d4bae4f7f",
+		"tenantId": "afceb71b-2e0c-497b-a69b-03344e88d70e"
+	}
+}
