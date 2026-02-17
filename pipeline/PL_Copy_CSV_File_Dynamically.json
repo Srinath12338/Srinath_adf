@@ -61,12 +61,26 @@
 						"referenceName": "DS_ADLS_File_Dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"FileName": "supermarket_sales"
+							"FileName": "supermarket_sales.csv"
 						}
 					}
 				]
 			}
 		],
+		"parameters": {
+			"SourceFolder": {
+				"type": "string"
+			},
+			"SourceFileName": {
+				"type": "string"
+			},
+			"TargetFolder": {
+				"type": "string"
+			},
+			"TargetFileName": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "DATA_Migration_Task"
 		},
