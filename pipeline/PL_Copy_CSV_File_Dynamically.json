@@ -68,17 +68,13 @@
 			}
 		],
 		"parameters": {
-			"SourceFolder": {
-				"type": "string"
-			},
 			"SourceFileName": {
-				"type": "string"
-			},
-			"TargetFolder": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "iris.csv"
 			},
 			"TargetFileName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "irisdataset"
 			}
 		},
 		"folder": {
