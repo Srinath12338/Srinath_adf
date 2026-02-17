@@ -50,13 +50,25 @@
 				"inputs": [
 					{
 						"referenceName": "DS_ADLS_Copy_Dataset",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"SourceFileName": {
+								"value": "@pipeline().parameters.SourceFilename",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
 					{
 						"referenceName": "DS_ADLS_Copy_Dataset",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"TargetFileName": {
+								"value": "@pipeline().parameters.TargetFileName",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
