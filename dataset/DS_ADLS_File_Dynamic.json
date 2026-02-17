@@ -9,9 +9,6 @@
 			"FileName": {
 				"type": "string",
 				"defaultValue": "supermarket_sales.csv"
-			},
-			"FolderName": {
-				"type": "string"
 			}
 		},
 		"folder": {
