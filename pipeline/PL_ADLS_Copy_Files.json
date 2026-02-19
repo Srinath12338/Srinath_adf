@@ -29,7 +29,8 @@
 					"sink": {
 						"type": "DelimitedTextSink",
 						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "FlattenHierarchy"
 						},
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
@@ -61,6 +62,11 @@
 				]
 			}
 		],
+		"parameters": {
+			"TargetFileName": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "DATA_MIGRATION_TASKS"
 		},
