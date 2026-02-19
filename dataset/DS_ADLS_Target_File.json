@@ -12,7 +12,10 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation"
+				"type": "AzureBlobFSLocation",
+				"fileName": "iris.csv",
+				"folderPath": "rawdatasets",
+				"fileSystem": "adfcontainer"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
