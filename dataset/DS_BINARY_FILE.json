@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "rawdatasets",
+				"folderPath": "ready datasets",
 				"fileSystem": "adfcontainer"
 			}
 		}
