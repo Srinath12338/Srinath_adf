@@ -21,13 +21,13 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Copy_CSV_File')]",
+			"name": "[concat(parameters('factoryName'), '/PL_ADLS_Copy_File')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data1",
+						"name": "CopyCsvFile",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -67,144 +67,60 @@
 								"mappings": [
 									{
 										"source": {
-											"name": "Item_Identifier",
+											"name": "sepal.length",
 											"type": "String",
 											"physicalType": "String"
 										},
 										"sink": {
-											"name": "Item_Identifier",
+											"name": "sepal.length",
 											"type": "String",
 											"physicalType": "String"
 										}
 									},
 									{
 										"source": {
-											"name": "Item_Weight",
+											"name": "sepal.width",
 											"type": "String",
 											"physicalType": "String"
 										},
 										"sink": {
-											"name": "Item_Weight",
+											"name": "sepal.width",
 											"type": "String",
 											"physicalType": "String"
 										}
 									},
 									{
 										"source": {
-											"name": "Item_Fat_Content",
+											"name": "petal.length",
 											"type": "String",
 											"physicalType": "String"
 										},
 										"sink": {
-											"name": "Item_Fat_Content",
+											"name": "petal.length",
 											"type": "String",
 											"physicalType": "String"
 										}
 									},
 									{
 										"source": {
-											"name": "Item_Visibility",
+											"name": "petal.width",
 											"type": "String",
 											"physicalType": "String"
 										},
 										"sink": {
-											"name": "Item_Visibility",
+											"name": "petal.width",
 											"type": "String",
 											"physicalType": "String"
 										}
 									},
 									{
 										"source": {
-											"name": "Item_Type",
+											"name": "variety",
 											"type": "String",
 											"physicalType": "String"
 										},
 										"sink": {
-											"name": "Item_Type",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Item_MRP",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Item_MRP",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Outlet_Identifier",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Outlet_Identifier",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Outlet_Establishment_Year",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Outlet_Establishment_Year",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Outlet_Size",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Outlet_Size",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Outlet_Location_Type",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Outlet_Location_Type",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Outlet_Type",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Outlet_Type",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Item_Outlet_Sales",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "Item_Outlet_Sales",
+											"name": "variety",
 											"type": "String",
 											"physicalType": "String"
 										}
@@ -219,14 +135,14 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "DS_ADLS_SOURCE_CSV",
+								"referenceName": "DS_ADLS_Source_File",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "DS_ADLS_TARGET_CSV",
+								"referenceName": "DS_ADLS_Target_File",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -236,15 +152,226 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "DATA_MIGRATION_TASKS"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SOURCE_CSV')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_TARGET_CSV')]"
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Source_File')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Target_File')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_SOURCE_CSV')]",
+			"name": "[concat(parameters('factoryName'), '/PL_Copy_Csv_File_Dynamically')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyCsvFilesDynamically",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ADLS_CSV_FILE_DYNAMIC",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderName": {
+										"value": "@pipeline().parameters.SourceFolder",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@pipeline().parameters.SourceFileName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_CSV_FILE_DYNAMIC",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderName": {
+										"value": "@pipeline().parameters.TargetFolder",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@pipeline().parameters.TargetFileName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"SourceFolder": {
+						"type": "string",
+						"defaultValue": "rawdatasets"
+					},
+					"TargetFolder": {
+						"type": "string",
+						"defaultValue": "Archive datasets"
+					},
+					"SourceFileName": {
+						"type": "string"
+					},
+					"TargetFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DATA_MIGRATION_TASKS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_FILE_DYNAMIC')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_CSV_FILE_DYNAMIC')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ADLS Container"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderName",
+							"type": "Expression"
+						},
+						"fileSystem": "adfcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Item_Identifier",
+						"type": "String"
+					},
+					{
+						"name": "Item_Weight",
+						"type": "String"
+					},
+					{
+						"name": "Item_Fat_Content",
+						"type": "String"
+					},
+					{
+						"name": "Item_Visibility",
+						"type": "String"
+					},
+					{
+						"name": "Item_Type",
+						"type": "String"
+					},
+					{
+						"name": "Item_MRP",
+						"type": "String"
+					},
+					{
+						"name": "Outlet_Identifier",
+						"type": "String"
+					},
+					{
+						"name": "Outlet_Establishment_Year",
+						"type": "String"
+					},
+					{
+						"name": "Outlet_Size",
+						"type": "String"
+					},
+					{
+						"name": "Outlet_Location_Type",
+						"type": "String"
+					},
+					{
+						"name": "Outlet_Type",
+						"type": "String"
+					},
+					{
+						"name": "Item_Outlet_Sales",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Source_File')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -253,15 +380,16 @@
 					"type": "LinkedServiceReference"
 				},
 				"folder": {
-					"name": "ADLS_container"
+					"name": "ADLS Container"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "Sales.csv",
-						"fileSystem": "raw"
+						"fileName": "iris.csv",
+						"folderPath": "rawdatasets",
+						"fileSystem": "adfcontainer"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
@@ -275,7 +403,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_TARGET_CSV')]",
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Target_File')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -284,15 +412,16 @@
 					"type": "LinkedServiceReference"
 				},
 				"folder": {
-					"name": "ADLS_container"
+					"name": "ADLS Container"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "Copied_Sales_dataset",
-						"fileSystem": "processed"
+						"fileName": "iris data",
+						"folderPath": "Archive datasets",
+						"fileSystem": "adfcontainer"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
