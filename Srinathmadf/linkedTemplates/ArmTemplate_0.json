@@ -38,21 +38,13 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_CSV_FILE_DYNAMIC')]",
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_COPY_CSV_FILES_DYN')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "LS_ADLS_GEN2",
 					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"FolderName": {
-						"type": "string"
-					},
-					"FileName": {
-						"type": "string"
-					}
 				},
 				"folder": {
 					"name": "ADLS Container"
@@ -62,14 +54,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().FileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().FolderName",
-							"type": "Expression"
-						},
+						"fileName": "election_results_2024.csv",
+						"folderPath": "rawdatasets",
 						"fileSystem": "adfcontainer"
 					},
 					"columnDelimiter": ",",
@@ -77,56 +63,7 @@
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": [
-					{
-						"name": "Item_Identifier",
-						"type": "String"
-					},
-					{
-						"name": "Item_Weight",
-						"type": "String"
-					},
-					{
-						"name": "Item_Fat_Content",
-						"type": "String"
-					},
-					{
-						"name": "Item_Visibility",
-						"type": "String"
-					},
-					{
-						"name": "Item_Type",
-						"type": "String"
-					},
-					{
-						"name": "Item_MRP",
-						"type": "String"
-					},
-					{
-						"name": "Outlet_Identifier",
-						"type": "String"
-					},
-					{
-						"name": "Outlet_Establishment_Year",
-						"type": "String"
-					},
-					{
-						"name": "Outlet_Size",
-						"type": "String"
-					},
-					{
-						"name": "Outlet_Location_Type",
-						"type": "String"
-					},
-					{
-						"name": "Outlet_Type",
-						"type": "String"
-					},
-					{
-						"name": "Item_Outlet_Sales",
-						"type": "String"
-					}
-				]
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
@@ -194,6 +131,139 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_FILE_DYNAMIC')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ADLS Container"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderName",
+							"type": "Expression"
+						},
+						"fileSystem": "adfcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ADLS_COPY_CSV_FILES_DYN')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyCsvFileDynamically",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ADLS_COPY_CSV_FILES_DYN",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_COPY_CSV_FILES_DYN",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"FolderName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DATA_MIGRATION_TASKS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_COPY_CSV_FILES_DYN')]"
 			]
 		},
 		{
@@ -339,13 +409,13 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Copy_Csv_File_Dynamically')]",
+			"name": "[concat(parameters('factoryName'), '/PL_CSV_FILE_DYNAMIC')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "CopyCsvFilesDynamically",
+						"name": "CopyCsvFILEDYna",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -391,7 +461,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "DS_ADLS_CSV_FILE_DYNAMIC",
+								"referenceName": "DS_CSV_FILE_DYNAMIC",
 								"type": "DatasetReference",
 								"parameters": {
 									"FolderName": {
@@ -407,7 +477,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "DS_ADLS_CSV_FILE_DYNAMIC",
+								"referenceName": "DS_CSV_FILE_DYNAMIC",
 								"type": "DatasetReference",
 								"parameters": {
 									"FolderName": {
@@ -448,7 +518,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_CSV_FILE_DYNAMIC')]"
+				"[concat(variables('factoryId'), '/datasets/DS_CSV_FILE_DYNAMIC')]"
 			]
 		}
 	]
