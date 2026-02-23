@@ -11,9 +11,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_GEN2'"
 		},
+		"LS_AZURE_SQL_DB_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_AZURE_SQL_DB'"
+		},
 		"LS_ADLS_GEN2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://srinathsto.dfs.core.windows.net/"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "srinath-server.database.windows.net"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "srinath-db"
+		},
+		"LS_AZURE_SQL_DB_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "srinath-user"
 		}
 	},
 	"variables": {
@@ -32,6 +48,28 @@
 					"accountKey": {
 						"type": "SecureString",
 						"value": "[parameters('LS_ADLS_GEN2_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AZURE_SQL_DB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('LS_AZURE_SQL_DB_properties_typeProperties_server')]",
+					"database": "[parameters('LS_AZURE_SQL_DB_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_AZURE_SQL_DB_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_AZURE_SQL_DB_password')]"
 					}
 				}
 			},
@@ -241,6 +279,84 @@
 						"fileSystem": "adfcontainer"
 					}
 				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_TABLES')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AZURE_SQL_DB",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SchemaName": {
+						"type": "string"
+					},
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SQLDataMigration"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZURE_SQL_DB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_TO_ADLS_FILES')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GEN2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SQLDataMigration"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": "SQLTables",
+						"fileSystem": "adfcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
@@ -732,7 +848,14 @@
 												}
 											}
 										},
-										"enableLogging": false,
+										"logStorageSettings": {
+											"linkedServiceName": {
+												"referenceName": "LS_ADLS_GEN2",
+												"type": "LinkedServiceReference"
+											},
+											"path": "adfcontainer/rawdatasets"
+										},
+										"enableLogging": true,
 										"storeSettings": {
 											"type": "AzureBlobFSReadSettings",
 											"recursive": true,
@@ -756,6 +879,143 @@
 				"[concat(variables('factoryId'), '/datasets/DS_BINARY_FILE')]",
 				"[concat(variables('factoryId'), '/datasets/DS_BINARY_COPIED_FILE')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GEN2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Migrate_SQL_To_ADLS_CSV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupSQLTable",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select TABLE_SCHEMA, TABLE_NAME from Information_schema.Tables\nwhere TABLE_TYPE = 'BASE TABLE';",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_SQL_TABLES",
+								"type": "DatasetReference",
+								"parameters": {
+									"SchemaName": ".",
+									"TableName": "."
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupSQLTable",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupSQLTable').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 20,
+							"activities": [
+								{
+									"name": "CopyEachTable",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_SQL_TABLES",
+											"type": "DatasetReference",
+											"parameters": {
+												"SchemaName": {
+													"value": "@item().TABLE_SCHEMA",
+													"type": "Expression"
+												},
+												"TableName": {
+													"value": "@item().TABLE_NAME",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_TO_ADLS_FILES",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@concat(\n    item().TABLE_NAME,\n    formatDateTime(utcNow())\n)",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_TABLES')]",
+				"[concat(variables('factoryId'), '/datasets/DS_TO_ADLS_FILES')]"
 			]
 		}
 	]
