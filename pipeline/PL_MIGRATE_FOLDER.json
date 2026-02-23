@@ -139,7 +139,14 @@
 										}
 									}
 								},
-								"enableLogging": false,
+								"logStorageSettings": {
+									"linkedServiceName": {
+										"referenceName": "LS_ADLS_GEN2",
+										"type": "LinkedServiceReference"
+									},
+									"path": "adfcontainer/rawdatasets"
+								},
+								"enableLogging": true,
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
