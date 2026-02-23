@@ -1,5 +1,5 @@
 {
-	"name": "DS_ADLS_Source_File",
+	"name": "DS_ADLS_Target_File",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_ADLS_GEN2",
@@ -13,8 +13,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "iris.csv",
-				"folderPath": "rawdatasets",
+				"fileName": "iris data",
+				"folderPath": "Archive datasets",
 				"fileSystem": "adfcontainer"
 			},
 			"columnDelimiter": ",",
