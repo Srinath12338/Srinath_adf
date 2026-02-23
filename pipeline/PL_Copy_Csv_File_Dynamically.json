@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "CopyCsvFilesDynamically",
+				"name": "Copy data1",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -26,74 +26,21 @@
 							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
 						"referenceName": "DS_ADLS_CSV_FILE_DYNAMIC",
-						"type": "DatasetReference",
-						"parameters": {
-							"FolderName": {
-								"value": "@pipeline().parameters.SourceFolder",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "@pipeline().parameters.SourceFileName",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_ADLS_CSV_FILE_DYNAMIC",
-						"type": "DatasetReference",
-						"parameters": {
-							"FolderName": {
-								"value": "@pipeline().parameters.TargetFolder",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "@pipeline().parameters.TargetFileName",
-								"type": "Expression"
-							}
-						}
+						"type": "DatasetReference"
 					}
 				]
 			}
 		],
 		"parameters": {
-			"SourceFolder": {
-				"type": "string",
-				"defaultValue": "rawdatasets"
-			},
-			"TargetFolder": {
-				"type": "string",
-				"defaultValue": "Archive datasets"
-			},
-			"SourceFileName": {
+			"FolderName": {
 				"type": "string"
 			},
-			"TargetFileName": {
+			"FileName": {
 				"type": "string"
 			}
 		},
