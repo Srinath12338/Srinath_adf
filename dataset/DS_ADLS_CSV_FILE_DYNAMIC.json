@@ -27,14 +27,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().FileName",
-					"type": "Expression"
-				},
-				"folderPath": {
-					"value": "@dataset().FolderName",
-					"type": "Expression"
-				},
+				"fileName": "election_results_2024.csv",
+				"folderPath": "rawdatasets",
 				"fileSystem": "adfcontainer"
 			},
 			"columnDelimiter": ",",
