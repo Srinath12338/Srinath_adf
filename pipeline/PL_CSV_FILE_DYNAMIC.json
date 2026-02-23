@@ -83,10 +83,12 @@
 		],
 		"parameters": {
 			"SourceFolder": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "rawdatasets"
 			},
 			"TargetFolder": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "Archive datasets"
 			},
 			"SourceFileName": {
 				"type": "string"
