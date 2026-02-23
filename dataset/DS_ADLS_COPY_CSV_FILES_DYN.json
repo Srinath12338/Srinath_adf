@@ -1,0 +1,27 @@
+{
+	"name": "DS_ADLS_COPY_CSV_FILES_DYN",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_GEN2",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ADLS Container"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "election_results_2024.csv",
+				"folderPath": "rawdatasets",
+				"fileSystem": "adfcontainer"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
